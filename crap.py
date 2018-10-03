@@ -10,6 +10,7 @@ from rgbmatrix import Adafruit_RGBmatrix
 import numpy
 import random
 import cProfile
+import life as clife
 
 # Rows and chain length are both required parameters:
 rgb_matrix = Adafruit_RGBmatrix(32, 1)
@@ -68,6 +69,7 @@ def new_life(a):
 
 
 life = numpy.zeros((width, height), dtype=numpy.uint8)
+secondlife = numpy.zeros((width, height), dtype=numpy.uint8)
 life_history = numpy.zeros((width, height), dtype=numpy.uint8)
 
 def fill_with_crap():
@@ -111,7 +113,7 @@ def show():
 
 
 def tick():
-    global life, life_history
+    global life, secondlife, life_history
     # step += 1
     # if step == 256:
     #     step = 0
@@ -120,7 +122,7 @@ def tick():
 
     # Random life injection
     life[random.randint(0, width - 1)][random.randint(0, height - 1)] = 1
-    life = new_life(life)
+    secondlife, life = life, clife.life(life, secondlife)
     for x in range(0, width):
         for y in range(0, height):
             if life[x][y]:
@@ -136,8 +138,8 @@ fill_with_crap()
 # life[2,1] = 1
 # life[2,2] = 1
 while True:
-    # cProfile.run('tick()')
+    #cProfile.run('tick()')
     tick()
-    time.sleep(0.1)
+    #time.sleep(0.1)
 
 rgb_matrix.Clear()
