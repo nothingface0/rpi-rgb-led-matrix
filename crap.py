@@ -5,6 +5,7 @@
 # refresh operation needed.
 # Requires rgbmatrix.so present in the same directory.
 
+import sys
 import time
 from rgbmatrix import Adafruit_RGBmatrix
 import numpy
@@ -73,6 +74,17 @@ secondlife   = numpy.zeros((width, height), dtype=numpy.uint8)
 alivelife    = numpy.zeros((width, height), dtype=numpy.uint8)
 life_history = numpy.zeros((width, height), dtype=numpy.int16)
 
+
+def fill_from_strings(strings):
+    y = 0 
+    for s in strings:
+        x = 0
+        for c in s:
+            if c not in [" ", "0"]:
+                life[x,y] = 1
+            x += 1
+        y += 1
+
 def fill_with_crap():
     for y in range(0, width):
         for x in range(0, height):
@@ -113,7 +125,7 @@ def fastshow(life, life_history):
 
     alive = (life > 0)
     r[alive] = 0
-    b[alive] = numpy.clip(life[alive]*32, 0, 255)
+    b[alive] = numpy.clip(life[alive], 0, 7)*32
     g[alive] = 255 - b[alive]
 
     dead = (life == 0)
@@ -133,7 +145,8 @@ def tick():
     #         life[random.randint(0, width - 1)][random.randint(0, height - 1)] = 1
 
     # Random life injection
-    life[random.randint(0, width - 1)][random.randint(0, height - 1)] = 1
+    if len(sys.argv) == 1: 
+        life[random.randint(0, width - 1)][random.randint(0, height - 1)] = 1
     secondlife, life = life, clife.life(life, secondlife)
 
     #           zero if dead       increment if alive
@@ -145,7 +158,11 @@ def tick():
 
     fastshow(alivelife, life_history)
 
-fill_with_crap()
+if len(sys.argv) > 1:
+    fill_from_strings(sys.argv[1:])
+else:
+    fill_with_crap()
+
 # life[1,1] = 1
 # life[1,2] = 1
 # life[2,1] = 1
@@ -155,6 +172,6 @@ while True:
         exit(1)
     #cProfile.run('tick()')
     tick()
-    #time.sleep(0.1)
+    time.sleep(0.02)
 
 rgb_matrix.Clear()
