@@ -105,6 +105,23 @@ def show(life, life_history):
 
     rgb_matrix.SetBuffer(a_list)
 
+def fastshow(life, life_history):
+    buf = numpy.zeros((life.shape[0], life.shape[1], 3), dtype=numpy.uint8)
+    r = buf[:,:, 0]
+    g = buf[:,:, 1]
+    b = buf[:,:, 2]
+
+    alive = (life > 0)
+    r[alive] = 0
+    b[alive] = numpy.clip(life[alive]*32, 0, 255)
+    g[alive] = 255 - b[alive]
+
+    dead = (life == 0)
+    r[dead] = life_history[dead]
+    g[dead] = life_history[dead]
+    b[dead] = life_history[dead]
+
+    rgb_matrix.SetBuffer(list(buf.flat))
 
 
 def tick():
@@ -126,7 +143,7 @@ def tick():
     life_history[life == 0] -= 8
     numpy.clip(life_history, 0, 128, out=life_history)
 
-    show(alivelife, life_history)
+    fastshow(alivelife, life_history)
 
 fill_with_crap()
 # life[1,1] = 1
@@ -134,6 +151,8 @@ fill_with_crap()
 # life[2,1] = 1
 # life[2,2] = 1
 while True:
+    if life.sum(axis=1).sum() < 1:
+        exit(1)
     #cProfile.run('tick()')
     tick()
     #time.sleep(0.1)
