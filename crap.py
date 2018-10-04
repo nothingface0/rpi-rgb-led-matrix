@@ -68,8 +68,9 @@ def new_life(a):
     return new_a
 
 
-life = numpy.zeros((width, height), dtype=numpy.uint8)
-secondlife = numpy.zeros((width, height), dtype=numpy.uint8)
+life         = numpy.zeros((width, height), dtype=numpy.uint8)
+secondlife   = numpy.zeros((width, height), dtype=numpy.uint8)
+alivelife    = numpy.zeros((width, height), dtype=numpy.uint8)
 life_history = numpy.zeros((width, height), dtype=numpy.uint8)
 
 def fill_with_crap():
@@ -79,7 +80,7 @@ def fill_with_crap():
 
 
 a_list = [0] * 3072
-def show():
+def show(life, life_history):
     if life.sum(axis=1).sum() < 1:
         exit(1)
     
@@ -90,9 +91,9 @@ def show():
             if life[x][y]:
                 a_list[i] = 0
                 i += 1
-                a_list[i] = 255 - life[x][y]
+                a_list[i] = 255 - min(life[x][y] * 32, 255)
                 i += 1
-                a_list[i] = life[x][y]
+                a_list[i] = min(life[x][y] * 32, 255)
                 i += 1
             else:
                 a_list[i] = life_history[x][y]
@@ -104,16 +105,10 @@ def show():
 
     rgb_matrix.SetBuffer(a_list)
 
-    # for y in range(0, width):
-    #     for x in range(0, height):
-    #         if life[x][y]:
-    #             rgb_matrix.SetPixel(x, y, 0, 255 - life[x][y], life[x][y])
-    #         else:
-    #             rgb_matrix.SetPixel(x, y, life_history[x][y], life_history[x][y], life_history[x][y])
 
 
 def tick():
-    global life, secondlife, life_history
+    global life, secondlife, life_history, alivelife
     # step += 1
     # if step == 256:
     #     step = 0
@@ -123,6 +118,8 @@ def tick():
     # Random life injection
     life[random.randint(0, width - 1)][random.randint(0, height - 1)] = 1
     secondlife, life = life, clife.life(life, secondlife)
+    #           zero if dead       increment if alive
+    alivelife = (alivelife * life) + life
     for x in range(0, width):
         for y in range(0, height):
             if life[x][y]:
@@ -130,7 +127,7 @@ def tick():
             else:
                 life_history[x][y] = max(0, life_history[x][y] - 8)
 
-    show()
+    show(alivelife, life_history)
 
 fill_with_crap()
 # life[1,1] = 1
