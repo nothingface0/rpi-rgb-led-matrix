@@ -71,7 +71,7 @@ def new_life(a):
 life         = numpy.zeros((width, height), dtype=numpy.uint8)
 secondlife   = numpy.zeros((width, height), dtype=numpy.uint8)
 alivelife    = numpy.zeros((width, height), dtype=numpy.uint8)
-life_history = numpy.zeros((width, height), dtype=numpy.uint8)
+life_history = numpy.zeros((width, height), dtype=numpy.int16)
 
 def fill_with_crap():
     for y in range(0, width):
@@ -118,14 +118,13 @@ def tick():
     # Random life injection
     life[random.randint(0, width - 1)][random.randint(0, height - 1)] = 1
     secondlife, life = life, clife.life(life, secondlife)
+
     #           zero if dead       increment if alive
     alivelife = (alivelife * life) + life
-    for x in range(0, width):
-        for y in range(0, height):
-            if life[x][y]:
-                life_history[x][y] = min(128, life_history[x][y] + 64)
-            else:
-                life_history[x][y] = max(0, life_history[x][y] - 8)
+
+    life_history[life > 0] += 64
+    life_history[life == 0] -= 8
+    numpy.clip(life_history, 0, 128, out=life_history)
 
     show(alivelife, life_history)
 
