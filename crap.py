@@ -172,6 +172,6 @@ while True:
         exit(1)
     #cProfile.run('tick()')
     tick()
-    time.sleep(0.02)
+    time.sleep(0.03)
 
 rgb_matrix.Clear()
